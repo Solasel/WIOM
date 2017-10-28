@@ -1,0 +1,2 @@
+(address - 2) + WE(1) + Data(8)(address-2) + WE(1) Data(8)
+
