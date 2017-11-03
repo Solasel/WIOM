@@ -44,20 +44,44 @@ struct signal_pair {
 };
 
 /* Error codes! */
-static const int max_error = 1;
-static const char *error_codes[] = {
-	/* Improper usage errors. */
-	"INVALID_ERROR", "Bad CMD-line arguments.",
-	"INVALID_ERROR", "INVALID_ERROR",
-	"INVALID_ERROR", "INVALID_ERROR",
-	"INVALID_ERROR", "INVALID_ERROR",
-	"INVALID_ERROR", "INVALID_ERROR",
+enum errs {
+	/* Debug codes. */
+	NOT_YET_IMP,
 
-	/* Debugging error codes. */
-	"not-yet-implemented"
+	/* Runtime error codes. */
+	BAD_ARGS,
+	FOPEN_FAILURE,
+	MALLOC_FAILURE
 };
 
+/* Useful error messages. */
+static char *err_msg(enum errs code)
+{
+	switch(code) {
+		/* Debug codes. */
+		case NOT_YET_IMP:
+			return "Not yet implemented.";
+
+		/* Runtime error codes. */
+		case BAD_ARGS:
+			return "Bad command-line arguments.";
+		case FOPEN_FAILURE:
+			return "Failed to open a file.";
+		case MALLOC_FAILURE:
+			return "Malloc failed.";
+	}
+	
+	/* This is only here to appease the compiler.
+	 * Note that since we're switching on an enum,
+	 * we are enforced to handle all of the cases,
+	 * so this is guaranteed to never be readhed.  */
+	return NULL;
+}
+
 /* Function prototypes. */
+
+/* Useful error messages. */
+static char *err_msg(enum errs code);
 
 /* Interprets the contents of src as microcode, and
  * stores the logisim-compatible microcode in dst. */
@@ -86,8 +110,8 @@ int main(int argc, char *argv[])
 	if (argc != 3) {
 		printf("ERROR: The generator should take two command-line arguments.\n\n"
 			"Sample usage:\n"
-			"./{exec} {src file} {target file}\n\n");
-		failure = 1;
+			"./{exec} {src file} {target file}\n");
+		failure = BAD_ARGS;
 		goto end;
 	}
 
@@ -101,11 +125,11 @@ int main(int argc, char *argv[])
 
 end:
 	/* HAndles errors and gives the user useful information. */
-	printf("##############################################################\n\n");
+	printf("\n##############################################################\n\n");
 
 	if (failure)
 		printf("Microcode generation failed! Neither file has been changed.\n"
-			"Error code: %d: %s\n\n", failure, error_codes[failure]);
+			"ERROR MSG: %s\n\n", err_msg(failure));
 	else
 		printf("Microcode generation successful!\n"
 			"%s now contains logisim 2.0 compatible microcode!\n\n",
@@ -133,8 +157,8 @@ static int generate_microcode(char *src, char *dst)
 			&instr_sig_len, &mc_len, &invalid_mc,
 			&num_x, &x_microcode);
 	if (failure) {
-		printf("Failed to extract information from %s at line %d\n\n",
-				src, __LINE__);
+		printf("%d: Failed to extract information from '%s'.\n",
+				__LINE__, src);
 		return failure;
 	}
 
@@ -146,7 +170,7 @@ static int generate_microcode(char *src, char *dst)
 			&num_f, &f_microcode);
 	free(x_microcode);
 	if (failure) {
-		printf("Failed to generate a final list of microcode at %d\n\n",
+		printf("%d: Failed to generate a final list of microcode.\n",
 				__LINE__);
 		goto free_inv;
 	}
@@ -154,9 +178,8 @@ static int generate_microcode(char *src, char *dst)
 	/* Using invalid_mc, num_f, and f_microcode, writes microcode to dst. */
 	failure = write_mc(dst, invalid_mc, num_f, f_microcode);
 	if (failure)
-		printf("Failed to write microcode to %s at %d\n\n",
-				dst, __LINE__);
-
+		printf("%d: Failed to write microcode to '%s'.\n",
+				__LINE__, dst);
 
 	free(f_microcode);
 free_inv:
@@ -170,19 +193,30 @@ static int read_src_file(char *src,
 		int *is_len, int *mc_len, char **inv,
 		int *num_x, struct string_pair** x_mc)
 {
-	return 10;
+	int failure;
+	FILE *source;
+	long len;
+
+	source = fopen(src, "rb");
+	if (!source) {
+		printf("%d: Failed to read from file '%s'.\n",
+				__LINE__, src);
+		return FOPEN_FAILURE;
+	}
+
+	return NOT_YET_IMP;
 }
 
 /* Generates the sorted final list of microcode. */
 static int gen_fin_mc(struct string_pair *x_mc,
 		int *num_f, struct signal_pair **f_mc)
 {
-	return 10;
+	return NOT_YET_IMP;
 }
 
 /* Writes the final microcode to the destination file. */
 static int write_mc(char *dst, char *inv, int num_f, struct signal_pair *f_mc)
 {
-	return 10;
+	return NOT_YET_IMP;
 }
 
