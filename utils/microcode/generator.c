@@ -196,7 +196,9 @@ static int read_src_file(char *src,
 	int failure;
 	FILE *source;
 	long len;
+	char *fstring;
 
+	/* Compile a filestring for src. */
 	source = fopen(src, "rb");
 	if (!source) {
 		printf("%d: Failed to read from file '%s'.\n",
@@ -204,6 +206,24 @@ static int read_src_file(char *src,
 		return FOPEN_FAILURE;
 	}
 
+	fseek(source, 0, SEEK_END);
+	len = ftell(source);
+	fseek(source, 0, SEEK_SET);
+
+	fstring = malloc((len + 1) * sizeof(char));
+	if (!fstring) {
+		printf("%d: Failed to malloc a filestring for '%s'.\n",
+				__LINE__, src);
+		fclose(source);
+		return MALLOC_FAILURE;
+	}
+
+	fread(fstring, 1, len, source);
+	fstring[len] = '\0';
+	fclose(source);
+
+free_fstring:
+	free(fstring);
 	return NOT_YET_IMP;
 }
 
