@@ -254,7 +254,7 @@ static int read_src_file(char *src,
 	*inv = strdup(line);
 
 	/* Rest of the file = microcode combinations. */
-	*x_mc = malloc((*num_x) * sizeof(struct string_pair *));
+	*x_mc = malloc((*num_x) * sizeof(struct string_pair));
 	if (!*x_mc) {
 		printf("%d: Failed to malloc a list of string pairs for microcode in '%s'.\n",
 				__LINE__, src);
@@ -263,21 +263,10 @@ static int read_src_file(char *src,
 	}
 
 	for (i = 0; i < *num_x; i++) {
-		(*x_mc)[i] = malloc(sizeof(struct string_pair));
-		if (!(*x_mc + i)) {
-			printf("%d: Failed to malloc a string pair for microcode in '%s'.\n",
-					__LINE__, src);
-			while (i--)
-				free((*x_mc)[i]);
-			free(*x_mc);
-			failure = MALLOC_FAILURE;
-			goto free_fstring;
-		}
-
 		line = strtok_r(NULL, NEWLINES, &line_sptr);
 		strtok(line, " |");
-		(*x_mc)[i]->instr_signal = strdup(strtok(NULL, " |"));
-		(*x_mc)[i]->microcode = strdup(strtok(NULL, " |"));
+		(*x_mc)[i].instr_signal = strdup(strtok(NULL, " |"));
+		(*x_mc)[i].microcode = strdup(strtok(NULL, " |"));
 	}
 
 free_fstring:
