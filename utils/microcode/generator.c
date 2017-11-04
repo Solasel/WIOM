@@ -29,6 +29,7 @@ Write to the output file, with gaps of (INVALID) between valid instructions.
 */
 
 /* Headers and constants. */
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,7 +47,7 @@ struct signal_pair {
 /* Error codes! */
 enum errs {
 	/* Debug codes. */
-	NOT_YET_IMP,
+	NOT_YET_IMP = 1,
 
 	/* Runtime error codes. */
 	BAD_ARGS,
@@ -57,7 +58,7 @@ enum errs {
 /* Useful error messages. */
 static char *err_msg(enum errs code)
 {
-	switch(code) {
+	switch (code) {
 		/* Debug codes. */
 		case NOT_YET_IMP:
 			return "Not yet implemented.";
@@ -168,12 +169,12 @@ static int generate_microcode(char *src, char *dst)
 	 * 				sorted by instr_code.		   */
 	failure = gen_fin_mc(x_microcode,
 			&num_f, &f_microcode);
-	free(x_microcode);
 	if (failure) {
 		printf("%d: Failed to generate a final list of microcode.\n",
 				__LINE__);
 		goto free_inv;
 	}
+	free(x_microcode);
 
 	/* Using invalid_mc, num_f, and f_microcode, writes microcode to dst. */
 	failure = write_mc(dst, invalid_mc, num_f, f_microcode);
@@ -193,10 +194,14 @@ static int read_src_file(char *src,
 		int *is_len, int *mc_len, char **inv,
 		int *num_x, struct string_pair** x_mc)
 {
-	int failure;
+	int failure = 0;
+	int i;
+	char *NEWLINES = "\r\n";
+
 	FILE *source;
 	long len;
-	char *fstring;
+	char *fstring, *line, *token;
+	char *line_sptr = NULL;
 
 	/* Compile a filestring for src. */
 	source = fopen(src, "rb");
@@ -207,10 +212,10 @@ static int read_src_file(char *src,
 	}
 
 	fseek(source, 0, SEEK_END);
-	len = ftell(source);
+	len = ftell(source) + 1;
 	fseek(source, 0, SEEK_SET);
 
-	fstring = malloc((len + 1) * sizeof(char));
+	fstring = malloc(len * sizeof(char));
 	if (!fstring) {
 		printf("%d: Failed to malloc a filestring for '%s'.\n",
 				__LINE__, src);
@@ -222,9 +227,62 @@ static int read_src_file(char *src,
 	fstring[len] = '\0';
 	fclose(source);
 
+	/* Finds x_mc. */
+	token = strdup(fstring);
+	if (!token) {
+		printf("%d: Failed to malloc a duplicate filestring for '%s'.\n",
+				__LINE__, src);
+		failure = MALLOC_FAILURE;
+		goto free_fstring;
+	}
+
+	line = strtok(token, "\n");
+	*num_x = -2;
+	while ((line = strtok(NULL, "\n")))
+		(*num_x)++;
+	free(token);
+
+	/* Parses through the file and finds the remaining data. */
+	/* First line = instr_sig_len. */
+	line = strtok_r(fstring, NEWLINES, &line_sptr);
+	*is_len = strtol(line, NULL, 10);
+	/* Second line = mc_len. */
+	line = strtok_r(NULL, NEWLINES, &line_sptr);
+	*mc_len = strtol(line, NULL, 10);
+	/* Third line = invalid_mc. */
+	line = strtok_r(NULL, NEWLINES, &line_sptr);
+	*inv = strdup(line);
+
+	/* Rest of the file = microcode combinations. */
+	*x_mc = malloc((*num_x) * sizeof(struct string_pair *));
+	if (!*x_mc) {
+		printf("%d: Failed to malloc a list of string pairs for microcode in '%s'.\n",
+				__LINE__, src);
+		failure = MALLOC_FAILURE;
+		goto free_fstring;
+	}
+
+	for (i = 0; i < *num_x; i++) {
+		(*x_mc + i) = malloc(sizeof(struct string_pair));
+		if (!(*x_mc + i)) {
+			printf("%d: Failed to malloc a string pair for microcode in '%s'.\n",
+					__LINE__, src);
+			for (i = i - 1; i >= 0; i--)
+				free(*x_mc + i);
+			free(*x_mc);
+			failure = MALLOC_FAILURE;
+			goto free_fstring;
+		}
+
+		line = strtok_r(NULL, NEWLINES, &line_sptr);
+		strtok(line, " |");
+		(*x_mc)[i].instr_signal = strdup(strtok(NULL, " |"));
+		(*x_mc)[i].microcode = strdup(strtok(NULL, " |"));
+	}
+
 free_fstring:
 	free(fstring);
-	return NOT_YET_IMP;
+	return failure;
 }
 
 /* Generates the sorted final list of microcode. */
