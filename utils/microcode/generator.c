@@ -48,7 +48,6 @@ struct signal_pair {
 enum errs {
 	/* Debug codes. */
 	NOT_YET_IMP = 1,
-
 	/* Runtime error codes. */
 	BAD_ARGS,
 	FOPEN_FAILURE,
@@ -62,7 +61,6 @@ static char *err_msg(enum errs code)
 		/* Debug codes. */
 		case NOT_YET_IMP:
 			return "Not yet implemented.";
-
 		/* Runtime error codes. */
 		case BAD_ARGS:
 			return "Bad command-line arguments.";
@@ -71,7 +69,6 @@ static char *err_msg(enum errs code)
 		case MALLOC_FAILURE:
 			return "Malloc failed.";
 	}
-	
 	/* This is only here to appease the compiler.
 	 * Note that since we're switching on an enum,
 	 * we are enforced to handle all of the cases,
@@ -89,9 +86,9 @@ static char *err_msg(enum errs code);
 static int generate_microcode(char *src, char *dst);
 
 /* Extracts information from src. */
-static int read_src_file(char *src,
+static int read_src(char *src, char **fstring,
 		int *is_len, int *mc_len, char **inv,
-		int *num_x, struct string_pair** x_mc);
+		int *num_x, struct string_pair **x_mc);
 
 /* Generates the sorted final list of microcode. */
 static int gen_fin_mc(struct string_pair *x_mc,
@@ -135,6 +132,7 @@ end:
 		printf("Microcode generation successful!\n"
 			"%s now contains logisim 2.0 compatible microcode!\n\n",
 				argv[2]);
+	return failure - 1;
 }
 
 /* #################
@@ -144,7 +142,7 @@ end:
 static int generate_microcode(char *src, char *dst)
 {
 	int failure, instr_sig_len, mc_len, num_x, num_f;
-	char *invalid_mc;
+	char *fstring, *invalid_mc;
 	struct string_pair *x_microcode;
 	struct signal_pair *f_microcode;
 
@@ -153,8 +151,9 @@ static int generate_microcode(char *src, char *dst)
 	 * 	mc_len		- length of microcode signals.
 	 * 	invalid_mc	- invalid microcode (for filler).
 	 * 	num_x		- number of 'x' containing instr_signals.
-	 * 	x_microcode	- list of 'x' containing instr_signals.   */
-	failure = read_src_file(src,
+	 * 	x_microcode	- list of 'x' containing instr_signals.
+	 * Also outputs fstring, used to free the whole affair at the end. */
+	failure = read_src(src, &fstring,
 			&instr_sig_len, &mc_len, &invalid_mc,
 			&num_x, &x_microcode);
 	if (failure) {
@@ -172,7 +171,7 @@ static int generate_microcode(char *src, char *dst)
 	if (failure) {
 		printf("%d: Failed to generate a final list of microcode.\n",
 				__LINE__);
-		goto free_inv;
+		goto free_fstring_xmc;
 	}
 	free(x_microcode);
 
@@ -183,14 +182,15 @@ static int generate_microcode(char *src, char *dst)
 				__LINE__, dst);
 
 	free(f_microcode);
-free_inv:
-	free(invalid_mc);
+free_fstring_xmc:
+	free(fstring);
+	free(x_microcode);
 	
 	return failure;
 }
 
 /* Extracts information from src. */
-static int read_src_file(char *src,
+static int read_src(char *src, char **fstring,
 		int *is_len, int *mc_len, char **inv,
 		int *num_x, struct string_pair **x_mc)
 {
@@ -200,7 +200,7 @@ static int read_src_file(char *src,
 
 	FILE *source;
 	long len;
-	char *fstring, *line, *token;
+	char *fstringdup, *line;
 	char *line_sptr = NULL;
 
 	/* Compile a filestring for src. */
@@ -215,96 +215,60 @@ static int read_src_file(char *src,
 	len = ftell(source);
 	fseek(source, 0, SEEK_SET);
 
-	fstring = malloc((len + 1) * sizeof(char));
-	if (!fstring) {
+	*fstring = malloc((len + 1) * sizeof(char));
+	if (!*fstring) {
 		printf("%d: Failed to malloc a filestring for '%s'.\n",
 				__LINE__, src);
 		fclose(source);
 		return MALLOC_FAILURE;
 	}
 
-	fread(fstring, 1, len, source);
+	fread(*fstring, 1, len, source);
 	fclose(source);
-	fstring[len] = '\0';
+	(*fstring)[len] = '\0';
 
 	/* Finds x_mc. */
-	token = strdup(fstring);
-	if (!token) {
+	fstringdup = strdup(*fstring);
+	if (!fstringdup) {
 		printf("%d: Failed to malloc a duplicate filestring for '%s'.\n",
 				__LINE__, src);
-		failure = MALLOC_FAILURE;
-		goto free_fstring;
+		free(*fstring);
+		return MALLOC_FAILURE;
 	}
 
-	line = strtok(token, "\n");
+	line = strtok(fstringdup, "\n");
 	*num_x = -2;
 	while ((line = strtok(NULL, "\n")))
 		(*num_x)++;
-	free(token);
+	free(fstringdup);
 
 	/* Parses through the file and finds the remaining data. */
 	/* First line = instr_sig_len. */
-	line = strtok_r(fstring, NEWLINES, &line_sptr);
+	line = strtok_r(*fstring, NEWLINES, &line_sptr);
 	*is_len = strtol(line, NULL, 10);
 	/* Second line = mc_len. */
 	line = strtok_r(NULL, NEWLINES, &line_sptr);
 	*mc_len = strtol(line, NULL, 10);
 	/* Third line = invalid_mc. */
 	line = strtok_r(NULL, NEWLINES, &line_sptr);
-	*inv = strdup(line);
-	if (!*inv) {
-		printf("%d: Failed to malloc the invalid microcode.\n",
-				__LINE__);
-		failure = MALLOC_FAILURE;
-		goto free_fstring;
-	}
+	*inv = line;
 
 	/* Rest of the file = microcode combinations. */
 	*x_mc = malloc((*num_x) * sizeof(struct string_pair));
 	if (!*x_mc) {
 		printf("%d: Failed to malloc a list of string_pairs for microcode in '%s'.\n",
 				__LINE__, src);
-		failure = MALLOC_FAILURE;
-		free(*inv);
-		goto free_fstring;
+		free(*fstring);
+		return MALLOC_FAILURE;
 	}
 
 	for (i = 0; i < *num_x; i++) {
 		line = strtok_r(NULL, NEWLINES, &line_sptr);
 		strtok(line, " |");
-
-		(*x_mc)[i].instr_signal = strdup(strtok(NULL, " |"));
-		if (!*inv) {
-			printf("%d: Failed to malloc an instruction signal.\n",
-					__LINE__);
-			failure = MALLOC_FAILURE;
-			free(*inv);
-			while (i--) {
-				free((*x_mc)[i].microcode);
-				free((*x_mc)[i].instr_signal);
-			}	
-			free(*x_mc);
-			goto free_fstring;
-		}
-
-		(*x_mc)[i].microcode = strdup(strtok(NULL, " |"));
-		if (!*inv) {
-			printf("%d: Failed to malloc a microcode operation.\n",
-					__LINE__);
-			failure = MALLOC_FAILURE;
-			free(*inv);
-			free((*x_mc)[i].instr_signal);
-			while (i--) {
-				free((*x_mc)[i].microcode);
-				free((*x_mc)[i].instr_signal);
-			}	
-			free(*x_mc);
-			goto free_fstring;
-		}
+		(*x_mc)[i].instr_signal = strtok(NULL, " |");
+		(*x_mc)[i].microcode = strtok(NULL, " |");
 	}
 
-free_fstring:
-	free(fstring);
 	return failure;
 }
 
