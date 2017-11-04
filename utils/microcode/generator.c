@@ -145,8 +145,8 @@ static int generate_microcode(char *src, char *dst)
 {
 	int failure, instr_sig_len, mc_len, num_x, num_f;
 	char *invalid_mc;
-	struct string_pair* x_microcode;
-	struct signal_pair* f_microcode;
+	struct string_pair *x_microcode;
+	struct signal_pair *f_microcode;
 
 	/* Extracts the following information from src:
 	 * 	instr_sig_len	- length of instr_signals.
@@ -192,7 +192,7 @@ free_inv:
 /* Extracts information from src. */
 static int read_src_file(char *src,
 		int *is_len, int *mc_len, char **inv,
-		int *num_x, struct string_pair** x_mc)
+		int *num_x, struct string_pair **x_mc)
 {
 	int failure = 0;
 	int i;
@@ -212,10 +212,10 @@ static int read_src_file(char *src,
 	}
 
 	fseek(source, 0, SEEK_END);
-	len = ftell(source) + 1;
+	len = ftell(source);
 	fseek(source, 0, SEEK_SET);
 
-	fstring = malloc(len * sizeof(char));
+	fstring = malloc((len + 1) * sizeof(char));
 	if (!fstring) {
 		printf("%d: Failed to malloc a filestring for '%s'.\n",
 				__LINE__, src);
@@ -224,8 +224,8 @@ static int read_src_file(char *src,
 	}
 
 	fread(fstring, 1, len, source);
-	fstring[len] = '\0';
 	fclose(source);
+	fstring[len] = '\0';
 
 	/* Finds x_mc. */
 	token = strdup(fstring);
@@ -263,12 +263,12 @@ static int read_src_file(char *src,
 	}
 
 	for (i = 0; i < *num_x; i++) {
-		(*x_mc + i) = malloc(sizeof(struct string_pair));
+		(*x_mc)[i] = malloc(sizeof(struct string_pair));
 		if (!(*x_mc + i)) {
 			printf("%d: Failed to malloc a string pair for microcode in '%s'.\n",
 					__LINE__, src);
-			for (i = i - 1; i >= 0; i--)
-				free(*x_mc + i);
+			while (i--)
+				free((*x_mc)[i]);
 			free(*x_mc);
 			failure = MALLOC_FAILURE;
 			goto free_fstring;
@@ -276,8 +276,8 @@ static int read_src_file(char *src,
 
 		line = strtok_r(NULL, NEWLINES, &line_sptr);
 		strtok(line, " |");
-		(*x_mc)[i].instr_signal = strdup(strtok(NULL, " |"));
-		(*x_mc)[i].microcode = strdup(strtok(NULL, " |"));
+		(*x_mc)[i]->instr_signal = strdup(strtok(NULL, " |"));
+		(*x_mc)[i]->microcode = strdup(strtok(NULL, " |"));
 	}
 
 free_fstring:
