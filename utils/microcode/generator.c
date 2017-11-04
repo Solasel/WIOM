@@ -252,21 +252,55 @@ static int read_src_file(char *src,
 	/* Third line = invalid_mc. */
 	line = strtok_r(NULL, NEWLINES, &line_sptr);
 	*inv = strdup(line);
+	if (!*inv) {
+		printf("%d: Failed to malloc the invalid microcode.\n",
+				__LINE__);
+		failure = MALLOC_FAILURE;
+		goto free_fstring;
+	}
 
 	/* Rest of the file = microcode combinations. */
 	*x_mc = malloc((*num_x) * sizeof(struct string_pair));
 	if (!*x_mc) {
-		printf("%d: Failed to malloc a list of string pairs for microcode in '%s'.\n",
+		printf("%d: Failed to malloc a list of string_pairs for microcode in '%s'.\n",
 				__LINE__, src);
 		failure = MALLOC_FAILURE;
+		free(*inv);
 		goto free_fstring;
 	}
 
 	for (i = 0; i < *num_x; i++) {
 		line = strtok_r(NULL, NEWLINES, &line_sptr);
 		strtok(line, " |");
+
 		(*x_mc)[i].instr_signal = strdup(strtok(NULL, " |"));
+		if (!*inv) {
+			printf("%d: Failed to malloc an instruction signal.\n",
+					__LINE__);
+			failure = MALLOC_FAILURE;
+			free(*inv);
+			while (i--) {
+				free((*x_mc)[i].microcode);
+				free((*x_mc)[i].instr_signal);
+			}	
+			free(*x_mc);
+			goto free_fstring;
+		}
+
 		(*x_mc)[i].microcode = strdup(strtok(NULL, " |"));
+		if (!*inv) {
+			printf("%d: Failed to malloc a microcode operation.\n",
+					__LINE__);
+			failure = MALLOC_FAILURE;
+			free(*inv);
+			free((*x_mc)[i].instr_signal);
+			while (i--) {
+				free((*x_mc)[i].microcode);
+				free((*x_mc)[i].instr_signal);
+			}	
+			free(*x_mc);
+			goto free_fstring;
+		}
 	}
 
 free_fstring:
