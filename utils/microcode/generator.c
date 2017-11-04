@@ -168,12 +168,12 @@ static int generate_microcode(char *src, char *dst)
 	 * 				sorted by instr_code.		   */
 	failure = gen_fin_mc(x_microcode,
 			&num_f, &f_microcode);
+	free(x_microcode);
 	if (failure) {
 		printf("%d: Failed to generate a final list of microcode.\n",
 				__LINE__);
-		goto free_fstring_xmc;
+		goto free_fstring;
 	}
-	free(x_microcode);
 
 	/* Using invalid_mc, num_f, and f_microcode, writes microcode to dst. */
 	failure = write_mc(dst, invalid_mc, num_f, f_microcode);
@@ -182,9 +182,8 @@ static int generate_microcode(char *src, char *dst)
 				__LINE__, dst);
 
 	free(f_microcode);
-free_fstring_xmc:
+free_fstring:
 	free(fstring);
-	free(x_microcode);
 	
 	return failure;
 }
