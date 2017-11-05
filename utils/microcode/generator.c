@@ -305,7 +305,7 @@ static int write_mc(const char *dst, int instr_sig_len,
 		 * between the instructions... */
 		gap = f_mc[i].instr_code - addr_i;
 		if (gap) {
-			fprintf(target, "%ldx", gap);
+			fprintf(target, "%ld*", gap);
 			fputs(inv, target);
 			fputc('\n', target);
 		}
@@ -319,7 +319,7 @@ static int write_mc(const char *dst, int instr_sig_len,
 	/* Now fill in INVALIDS until the end of memory. */
 	gap = max_addr - addr_i;
 	if (gap) {
-		fprintf(target, "%ldx", gap);
+		fprintf(target, "%ld*", gap);
 		fputs(inv, target);
 		fputc('\n', target);
 	}
