@@ -31,10 +31,10 @@ enum errs {
 
 /* Interprets the contents of src as microcode, and
  * stores the logisim-compatible microcode in dst. */
-static int generate_microcode(char *src, char *dst);
+static int generate_microcode(const char *src, const char *dst);
 
 /* Extracts information from src. */
-static int read_src(char *src, char **fstring,
+static int read_src(const char *src, char **fstring,
 		int *is_len, int *mc_len, char **inv,
 		int *num_x, struct string_pair **x_mc);
 
@@ -43,8 +43,8 @@ static int gen_fin_mc(int num_x, struct string_pair *x_mc,
 		int *num_f, struct signal_pair **f_mc);
 
 /* Writes the final microcode to the destination file. */
-static int write_mc(char *dst, int instr_sig_len,
-		char *inv, int num_f, struct signal_pair *f_mc);
+static int write_mc(const char *dst, int instr_sig_len,
+		const char *inv, int num_f, struct signal_pair *f_mc);
 
 /* Counts the occurrences of c in str. */
 static int char_occ(const char *str, char c);
@@ -66,7 +66,7 @@ static char *err_msg(enum errs code);
 /* Main. */
 int main(int argc, char *argv[])
 {
-	int failure = 1;
+	int failure;
 	printf("\n");
 
 	/* Makes sure there are an appropriate
@@ -96,16 +96,18 @@ end:
 			"ERROR MSG: %s\n\n", err_msg(failure));
 	else
 		printf("Microcode generation successful!\n"
-			"%s now contains logisim 2.0 compatible microcode!\n\n",
+			"'%s' now contains logisim 2.0 compatible microcode!\n\n",
 				argv[2]);
-	return failure - 1;
+	return failure;
 }
 
 /* #################
  * ### MAIN CODE ###
  * ################# */
 
-static int generate_microcode(char *src, char *dst)
+/* Interprets the contents of src as microcode, and
+ * stores the logisim-compatible microcode in dst. */
+static int generate_microcode(const char *src, const char *dst)
 {
 	int failure, instr_sig_len, mc_len, num_x, num_f;
 	char *fstring, *invalid_mc;
@@ -166,14 +168,14 @@ free_fstring:
 }
 
 /* Extracts information from src. */
-static int read_src(char *src, char **fstring,
+static int read_src(const char *src, char **fstring,
 		int *is_len, int *mc_len, char **inv,
 		int *num_x, struct string_pair **x_mc)
 {
+	const char *NEWLINES = "\r\n";
+
 	int failure = 0;
 	int i;
-	char *NEWLINES = "\r\n";
-
 	FILE *source;
 	long len;
 	char *fstringdup, *line;
@@ -199,22 +201,23 @@ static int read_src(char *src, char **fstring,
 		return MALLOC_FAILURE;
 	}
 
-	fread(*fstring, 1, len, source);
+	fread(*fstring, sizeof(char), len, source);
 	fclose(source);
 	(*fstring)[len] = '\0';
 
 	/* Finds x_mc. */
-	fstringdup = strdup(*fstring);
+	fstringdup = malloc((len + 1) * sizeof(char));
 	if (!fstringdup) {
 		printf("%d: Failed to malloc a duplicate filestring for '%s'.\n",
 				__LINE__, src);
 		free(*fstring);
 		return MALLOC_FAILURE;
 	}
+	memcpy(fstringdup, *fstring, len + 1);
 
-	line = strtok(fstringdup, "\n");
+	line = strtok(fstringdup, NEWLINES);
 	*num_x = -2;
-	while ((line = strtok(NULL, "\n")))
+	while ((line = strtok(NULL, NEWLINES)))
 		(*num_x)++;
 	free(fstringdup);
 
@@ -252,7 +255,6 @@ static int read_src(char *src, char **fstring,
 static int gen_fin_mc(int num_x, struct string_pair *x_mc,
 		int *num_f, struct signal_pair **f_mc)
 {
-	int failure = 0;
 	int i, j;
 
 	/* Find the final number of microcode instructions. */
@@ -269,12 +271,12 @@ static int gen_fin_mc(int num_x, struct string_pair *x_mc,
 	for (i = 0, j = 0; i < num_x; i++)
 		unpack(x_mc[i].instr_signal, x_mc[i].microcode, &j, f_mc);
 
-	return failure;
+	return 0;
 }
 
 /* Writes the final microcode to the destination file. */
-static int write_mc(char *dst, int instr_sig_len,
-		char *inv, int num_f, struct signal_pair *f_mc)
+static int write_mc(const char *dst, int instr_sig_len,
+		const char *inv, int num_f, struct signal_pair *f_mc)
 {
 	int failure = 0;
 	int max_addr = two_pow(instr_sig_len);
@@ -322,7 +324,7 @@ static int write_mc(char *dst, int instr_sig_len,
 static int char_occ(const char *str, char c)
 {
 	int count;
-	for (count = 0; str = strchr(str, c); str++)
+	for (count = 0; (str = strchr(str, c)); str++)
 		count++;
 	return count;
 }
