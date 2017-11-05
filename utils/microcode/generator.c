@@ -1,39 +1,11 @@
-/*
-Rough outline:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Read from a file listing
-
-instruction code | microcode
-
-combinations.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Expand all "x" variations of the instruction codes, and compile
-an array with structs containing:
-
-long instr_code;
-char *microcode;
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Sort the array based on instr_code.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Write to the output file, with gaps of (INVALID) between valid instructions.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
+/* Puts microcode of the defined format into
+ * the target file. */
 
 /* Headers and constants. */
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 struct string_pair {
 	char *instr_signal;
@@ -55,32 +27,7 @@ enum errs {
 	MALLOC_FAILURE
 };
 
-/* Useful error messages. */
-static char *err_msg(enum errs code)
-{
-	switch (code) {
-		/* Debug codes. */
-		case NOT_YET_IMP:
-			return "Not yet implemented.";
-		/* Runtime error codes. */
-		case BAD_ARGS:
-			return "Bad command-line arguments.";
-		case FOPEN_FAILURE:
-			return "Failed to open a file.";
-		case MALLOC_FAILURE:
-			return "Malloc failed.";
-	}
-	/* This is only here to appease the compiler.
-	 * Note that since we're switching on an enum,
-	 * we are enforced to handle all of the cases,
-	 * so this is guaranteed to never be readhed.  */
-	return NULL;
-}
-
 /* Function prototypes. */
-
-/* useful error messages. */
-static char *err_msg(enum errs code);
 
 /* Interprets the contents of src as microcode, and
  * stores the logisim-compatible microcode in dst. */
@@ -113,10 +60,13 @@ static void unpack(char *instr_sig, char *mc,
 /* Sorts a len long array of signal_pairs based on their instr_signal. */
 static int merge_sort_sig_pairs(int len, struct signal_pair *f_mc);
 
+/* Useful error messages. */
+static char *err_msg(enum errs code);
+
 /* Main. */
 int main(int argc, char *argv[])
 {
-	int failure;
+	int failure = 1;
 	printf("\n");
 
 	/* Makes sure there are an appropriate
@@ -134,7 +84,7 @@ int main(int argc, char *argv[])
 		" based on the contents of '%s'"
 		" and store it in '%s'...\n\n",
 			argv[1], argv[2]);
-	
+
 	failure = generate_microcode(argv[1], argv[2]);
 
 end:
@@ -211,7 +161,7 @@ free_f_microcode:
 	free(f_microcode);
 free_fstring:
 	free(fstring);
-	
+
 	return failure;
 }
 
@@ -306,9 +256,8 @@ static int gen_fin_mc(int num_x, struct string_pair *x_mc,
 	int i, j;
 
 	/* Find the final number of microcode instructions. */
-	for (i = 0, *num_f = 0; i < num_x; i++) {
+	for (i = 0, *num_f = 0; i < num_x; i++)
 		*num_f += two_pow(char_occ(x_mc[i].instr_signal, 'x'));
-	}
 
 	*f_mc = malloc(*num_f * sizeof(struct signal_pair));
 	if (!*f_mc) {
@@ -317,10 +266,8 @@ static int gen_fin_mc(int num_x, struct string_pair *x_mc,
 		return MALLOC_FAILURE;
 	}
 
-	for (i = 0, j = 0; i < num_x; i++) {
-		unpack(x_mc[i].instr_signal, x_mc[i].microcode,
-				&j, f_mc);
-	}
+	for (i = 0, j = 0; i < num_x; i++)
+		unpack(x_mc[i].instr_signal, x_mc[i].microcode, &j, f_mc);
 
 	return failure;
 }
@@ -356,6 +303,12 @@ static int write_mc(char *dst, int instr_sig_len,
 
 		addr_i = f_mc[i].instr_code + 1;
 	}
+	gap = max_addr - addr_i;
+	if (gap) {
+		fprintf(target, "%ldx", gap);
+		fputs(inv, target);
+		fputc('\n', target);
+	}
 
 	fclose(target);
 	return failure;
@@ -368,10 +321,9 @@ static int write_mc(char *dst, int instr_sig_len,
 /* Counts the occurrences of c in str. */
 static int char_occ(const char *str, char c)
 {
-	int i;
-	int count = 0;
-	for (i = 0; str[i]; i++)
-		count += str[i] == c ? 1: 0;
+	int count;
+	for (count = 0; str = strchr(str, c); str++)
+		count++;
 	return count;
 }
 
@@ -380,7 +332,7 @@ static int two_pow(int x)
 {
 	int rv = 1;
 	while (x--)
-		rv = 2 * rv;
+		rv *= 2;
 	return rv;
 }
 
@@ -461,5 +413,27 @@ static int merge_sort_sig_pairs(int len, struct signal_pair *f_mc)
 free_copy:
 	free(lower_half);
 	return failure;
+}
+
+/* Error handler. */
+static char *err_msg(enum errs code)
+{
+	switch (code) {
+	/* Debug codes. */
+	case NOT_YET_IMP:
+		return "Not yet implemented.";
+	/* Runtime error codes. */
+	case BAD_ARGS:
+		return "Bad command-line arguments.";
+	case FOPEN_FAILURE:
+		return "Failed to open a file.";
+	case MALLOC_FAILURE:
+		return "Malloc failed.";
+	}
+	/* This is only here to appease the compiler.
+	 * Note that since we're switching on an enum,
+	 * we are enforced to handle all of the cases,
+	 * so this is guaranteed to never be readhed.  */
+	return NULL;
 }
 
