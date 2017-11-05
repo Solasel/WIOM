@@ -1,5 +1,12 @@
-/* Puts microcode of the defined format into
- * the target file. */
+/* Takes in a file, src, parses through it to find
+ * all instruction signal / microcode combinations, and
+ * writes the result into a file that logisim2.0 can
+ * interpret as a memory file. 
+ *
+ * Then, indexing into the given RAM/ROM chip will allow
+ * you to make comprehensive control signals easily! 
+ *
+ * Thanks to my good friend sultanxda, for auditing this. */
 
 /* Headers and constants. */
 #define _GNU_SOURCE
@@ -28,7 +35,6 @@ enum errs {
 };
 
 /* Function prototypes. */
-
 /* Interprets the contents of src as microcode, and
  * stores the logisim-compatible microcode in dst. */
 static int generate_microcode(const char *src, const char *dst);
@@ -88,7 +94,7 @@ int main(int argc, char *argv[])
 	failure = generate_microcode(argv[1], argv[2]);
 
 end:
-	/* HAndles errors and gives the user useful information. */
+	/* Reports to the user how the program fared. */
 	printf("\n##############################################################\n\n");
 
 	if (failure)
@@ -163,7 +169,6 @@ free_f_microcode:
 	free(f_microcode);
 free_fstring:
 	free(fstring);
-
 	return failure;
 }
 
@@ -173,6 +178,7 @@ static int read_src(const char *src, char **fstring,
 		int *num_x, struct string_pair **x_mc)
 {
 	const char *NEWLINES = "\r\n";
+	const char *DELIMS = "\t |";
 
 	int failure = 0;
 	int i;
@@ -205,7 +211,7 @@ static int read_src(const char *src, char **fstring,
 	fclose(source);
 	(*fstring)[len] = '\0';
 
-	/* Finds x_mc. */
+	/* Finds x_mc by parsing through a copy of fstring. */
 	fstringdup = malloc((len + 1) * sizeof(char));
 	if (!fstringdup) {
 		printf("%d: Failed to malloc a duplicate filestring for '%s'.\n",
@@ -241,11 +247,13 @@ static int read_src(const char *src, char **fstring,
 		return MALLOC_FAILURE;
 	}
 
+	/* For each line, pulls off the mnemonic and
+	 * stores the necessary instr_signal and microcode. */
 	for (i = 0; i < *num_x; i++) {
 		line = strtok_r(NULL, NEWLINES, &line_sptr);
-		strtok(line, " |");
-		(*x_mc)[i].instr_signal = strtok(NULL, " |");
-		(*x_mc)[i].microcode = strtok(NULL, " |");
+		strtok(line, DELIMS);
+		(*x_mc)[i].instr_signal = strtok(NULL, DELIMS);
+		(*x_mc)[i].microcode = strtok(NULL, DELIMS);
 	}
 
 	return failure;
@@ -268,9 +276,9 @@ static int gen_fin_mc(int num_x, struct string_pair *x_mc,
 		return MALLOC_FAILURE;
 	}
 
+	/* For each 'x' containing instruction, unpacks it. */
 	for (i = 0, j = 0; i < num_x; i++)
 		unpack(x_mc[i].instr_signal, x_mc[i].microcode, &j, f_mc);
-
 	return 0;
 }
 
@@ -293,6 +301,8 @@ static int write_mc(const char *dst, int instr_sig_len,
 
 	fputs("v2.0 raw\n", target);
 	for (i = 0, addr_i = 0; i < num_f; i++) {
+		/* Puts in enough gap INVALIDS
+		 * between the instructions... */
 		gap = f_mc[i].instr_code - addr_i;
 		if (gap) {
 			fprintf(target, "%ldx", gap);
@@ -300,11 +310,13 @@ static int write_mc(const char *dst, int instr_sig_len,
 			fputc('\n', target);
 		}
 
+		/* And puts the next instruction. */
 		fputs(f_mc[i].microcode, target);
 		fputc('\n', target);
 
 		addr_i = f_mc[i].instr_code + 1;
 	}
+	/* Now fill in INVALIDS until the end of memory. */
 	gap = max_addr - addr_i;
 	if (gap) {
 		fprintf(target, "%ldx", gap);
@@ -352,6 +364,9 @@ static void unpack(char *instr_sig, char *mc,
 		return;
 	}
 
+	/* If not, recursively process both of the
+	 * combinations in turn, before returning it to
+	 * normal for above recursive calls.            */
 	*xptr = '0';
 	unpack(instr_sig, mc, index, target);
 	*xptr = '1';
