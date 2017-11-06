@@ -1,12 +1,12 @@
 gen: generator.c
 	$(CC) -o mic_gen generator.c
 
-code: generator.c microcode.txt
+code: generator.c src_mc.txt
 	$(CC) -o mic_gen generator.c
-	./mic_gen microcode.txt final
+	./mic_gen src_mc.txt final_mc.mem
 
-memleak: generator.c microcode.txt
+memleak: generator.c src_mc.txt
 	$(CC) -o mic_gen generator.c
-	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./mic_gen microcode.txt target
-	rm -f target
+	valgrind --tool=memcheck --leak-check=full --track-origins=yes ./mic_gen src_mc.txt tmp
+	rm -f tmp
 
