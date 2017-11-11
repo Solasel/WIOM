@@ -29,7 +29,7 @@ add t2 x0 x0
 addi s1 x0 555
 sw s0 0(s1)
 lw t0 0(s1)
-add t1 t0 t0
+add t1 t0 t0 #STALL!
 add t2 t0 t0
 
 # Changes: s1 = 0x0000022b, t0 = 0x12345678, t1 = t2 = 0x2468acf0
@@ -42,7 +42,7 @@ add t2 x0 x0
 # Checks for MEM->MEM forwarding on rs2.
 # Requires: lw, sw, MEM->MEM forwarding on rs2.
 lw t0 0(s1)
-sw s0 4(s1)
+sw t0 4(s1)
 lw t1 4(s1)
 
 # Changes: t0 = t1 = 0x12345678
