@@ -48,8 +48,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="facing" val="north"/>
     </tool>
     <tool name="Constant">
-      <a name="width" val="4"/>
-      <a name="value" val="0xe"/>
+      <a name="value" val="0x0"/>
     </tool>
     <tool name="Bit Extender">
       <a name="in_width" val="1"/>
@@ -69,7 +68,6 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
   <lib desc="#Plexers" name="2">
     <tool name="Multiplexer">
       <a name="facing" val="south"/>
-      <a name="width" val="32"/>
       <a name="enable" val="false"/>
     </tool>
     <tool name="Demultiplexer">
@@ -249,20 +247,14 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <wire from="(310,560)" to="(310,750)"/>
     <wire from="(280,500)" to="(280,750)"/>
     <wire from="(400,70)" to="(600,70)"/>
-    <comp lib="0" loc="(600,620)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="s9"/>
-      <a name="labelloc" val="east"/>
+    <comp lib="0" loc="(310,890)" name="Tunnel">
+      <a name="facing" val="north"/>
+      <a name="label" val="RESET"/>
     </comp>
-    <comp lib="5" loc="(990,340)" name="Button">
-      <a name="color" val="#2ba83a"/>
-    </comp>
-    <comp lib="0" loc="(600,480)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="s2"/>
-      <a name="labelloc" val="east"/>
+    <comp lib="1" loc="(1240,320)" name="AND Gate">
+      <a name="inputs" val="3"/>
+      <a name="negate0" val="true"/>
+      <a name="negate2" val="true"/>
     </comp>
     <comp lib="0" loc="(600,280)" name="Probe">
       <a name="facing" val="west"/>
@@ -270,27 +262,22 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="label" val="s0"/>
       <a name="labelloc" val="east"/>
     </comp>
-    <comp lib="0" loc="(990,450)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="width" val="32"/>
-      <a name="label" val="PC"/>
-    </comp>
-    <comp lib="0" loc="(600,240)" name="Probe">
+    <comp lib="0" loc="(990,300)" name="Clock"/>
+    <comp lib="0" loc="(600,180)" name="Probe">
       <a name="facing" val="west"/>
       <a name="radix" val="16"/>
-      <a name="label" val="t1"/>
+      <a name="label" val="gp"/>
       <a name="labelloc" val="east"/>
     </comp>
-    <comp lib="0" loc="(600,680)" name="Probe">
+    <comp lib="0" loc="(600,660)" name="Probe">
       <a name="facing" val="west"/>
       <a name="radix" val="16"/>
-      <a name="label" val="t3"/>
+      <a name="label" val="s11"/>
       <a name="labelloc" val="east"/>
     </comp>
-    <comp lib="1" loc="(1240,320)" name="AND Gate">
-      <a name="inputs" val="3"/>
-      <a name="negate0" val="true"/>
-      <a name="negate2" val="true"/>
+    <comp lib="0" loc="(510,800)" name="Tunnel">
+      <a name="facing" val="south"/>
+      <a name="label" val="END"/>
     </comp>
     <comp lib="0" loc="(1000,450)" name="Splitter">
       <a name="fanout" val="1"/>
@@ -329,45 +316,13 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="bit30" val="none"/>
       <a name="bit31" val="none"/>
     </comp>
-    <comp lib="0" loc="(600,120)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="zero"/>
-      <a name="labelloc" val="east"/>
+    <comp lib="0" loc="(1170,340)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="ERR"/>
     </comp>
-    <comp lib="0" loc="(600,560)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="s6"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(600,600)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="s8"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(180,890)" name="Tunnel">
-      <a name="facing" val="north"/>
-      <a name="label" val="clk"/>
-    </comp>
-    <comp lib="0" loc="(600,520)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="s4"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(600,180)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="gp"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(600,220)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="t0"/>
-      <a name="labelloc" val="east"/>
+    <comp lib="0" loc="(1170,300)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="END"/>
     </comp>
     <comp lib="0" loc="(600,300)" name="Probe">
       <a name="facing" val="west"/>
@@ -375,13 +330,170 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="label" val="s1"/>
       <a name="labelloc" val="east"/>
     </comp>
+    <comp lib="0" loc="(600,160)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="sp"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(600,140)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="ra"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(600,400)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="a4"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(600,480)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="s2"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(600,460)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="a7"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(600,320)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="a0"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="5" loc="(990,340)" name="Button">
+      <a name="color" val="#2ba83a"/>
+    </comp>
     <comp lib="5" loc="(990,220)" name="Button">
       <a name="color" val="#ff0500"/>
     </comp>
-    <comp lib="0" loc="(600,360)" name="Probe">
+    <comp lib="0" loc="(600,440)" name="Probe">
       <a name="facing" val="west"/>
       <a name="radix" val="16"/>
-      <a name="label" val="a2"/>
+      <a name="label" val="a6"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="5" loc="(600,810)" name="LED">
+      <a name="label" val="END"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="7" loc="(410,810)" name="main"/>
+    <comp lib="0" loc="(600,380)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="a3"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(960,200)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(1060,200)" name="Constant">
+      <a name="facing" val="west"/>
+    </comp>
+    <comp lib="0" loc="(600,340)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="a1"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(600,740)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="t6"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1060,240)" name="Constant">
+      <a name="facing" val="west"/>
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(70,840)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="width" val="32"/>
+      <a name="label" val="INSTR"/>
+    </comp>
+    <comp lib="0" loc="(600,600)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="s8"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="6" loc="(1103,403)" name="Text">
+      <a name="text" val="Program"/>
+    </comp>
+    <comp lib="0" loc="(600,200)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="tp"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(600,720)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="t5"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1250,320)" name="Tunnel">
+      <a name="label" val="clk"/>
+    </comp>
+    <comp lib="0" loc="(600,500)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="s3"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(600,680)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="t3"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(400,70)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="width" val="32"/>
+      <a name="label" val="PC"/>
+    </comp>
+    <comp lib="0" loc="(990,450)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="width" val="32"/>
+      <a name="label" val="PC"/>
+    </comp>
+    <comp lib="0" loc="(70,790)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="width" val="32"/>
+      <a name="label" val="PC"/>
+    </comp>
+    <comp lib="0" loc="(1000,220)" name="Tunnel">
+      <a name="label" val="RESET"/>
+    </comp>
+    <comp lib="0" loc="(600,240)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="t1"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1260,450)" name="Tunnel">
+      <a name="width" val="32"/>
+      <a name="label" val="INSTR"/>
+    </comp>
+    <comp lib="0" loc="(600,580)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="s7"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="1" loc="(1040,320)" name="OR Gate">
+      <a name="size" val="30"/>
+      <a name="inputs" val="2"/>
+    </comp>
+    <comp lib="0" loc="(600,700)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="t4"/>
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="5" loc="(600,850)" name="LED">
@@ -394,62 +506,55 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="label" val="PC"/>
       <a name="labelloc" val="east"/>
     </comp>
-    <comp lib="0" loc="(70,790)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="width" val="32"/>
-      <a name="label" val="PC"/>
-    </comp>
-    <comp lib="0" loc="(600,580)" name="Probe">
+    <comp lib="0" loc="(600,360)" name="Probe">
       <a name="facing" val="west"/>
       <a name="radix" val="16"/>
-      <a name="label" val="s7"/>
+      <a name="label" val="a2"/>
       <a name="labelloc" val="east"/>
     </comp>
-    <comp lib="0" loc="(600,740)" name="Probe">
+    <comp lib="0" loc="(600,620)" name="Probe">
       <a name="facing" val="west"/>
       <a name="radix" val="16"/>
-      <a name="label" val="t6"/>
+      <a name="label" val="s9"/>
       <a name="labelloc" val="east"/>
     </comp>
-    <comp lib="0" loc="(960,200)" name="Constant">
-      <a name="value" val="0x0"/>
-    </comp>
-    <comp lib="6" loc="(1103,403)" name="Text">
-      <a name="text" val="Program"/>
-    </comp>
-    <comp lib="0" loc="(600,660)" name="Probe">
+    <comp lib="0" loc="(600,520)" name="Probe">
       <a name="facing" val="west"/>
       <a name="radix" val="16"/>
-      <a name="label" val="s11"/>
+      <a name="label" val="s4"/>
       <a name="labelloc" val="east"/>
     </comp>
-    <comp lib="0" loc="(600,700)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="t4"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(1060,240)" name="Constant">
-      <a name="facing" val="west"/>
-      <a name="value" val="0x0"/>
-    </comp>
-    <comp lib="0" loc="(600,460)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="a7"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(600,200)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="tp"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="7" loc="(410,810)" name="main"/>
+    <comp lib="0" loc="(960,240)" name="Constant"/>
     <comp lib="0" loc="(600,640)" name="Probe">
       <a name="facing" val="west"/>
       <a name="radix" val="16"/>
       <a name="label" val="s10"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(600,560)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="s6"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(180,890)" name="Tunnel">
+      <a name="facing" val="north"/>
+      <a name="label" val="clk"/>
+    </comp>
+    <comp lib="4" loc="(1170,450)" name="ROM">
+      <a name="addrWidth" val="24"/>
+      <a name="dataWidth" val="32"/>
+      <a name="contents">addr/data: 24 32
+fff00113 fff00413 100493 100006f 6f 100006f ff9ff06f ff9ff06f
+ff1ff06f c000ef 100006f fe5ff06f 8067 fddff06f c000ef fd5ff06f
+c0006f 408067 fc9ff06f 4000ef 80e7 8000ef fb9ff06f 4080e7
+fb1ff06f 73
+</a>
+    </comp>
+    <comp lib="0" loc="(600,120)" name="Probe">
+      <a name="facing" val="west"/>
+      <a name="radix" val="16"/>
+      <a name="label" val="zero"/>
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(600,420)" name="Probe">
@@ -458,104 +563,9 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="label" val="a5"/>
       <a name="labelloc" val="east"/>
     </comp>
-    <comp lib="0" loc="(600,320)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="a0"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(600,140)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="ra"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(1000,220)" name="Tunnel">
-      <a name="label" val="RESET"/>
-    </comp>
-    <comp lib="0" loc="(1170,340)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="ERR"/>
-    </comp>
-    <comp lib="0" loc="(400,70)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="width" val="32"/>
-      <a name="label" val="PC"/>
-    </comp>
-    <comp lib="0" loc="(600,720)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="t5"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(310,890)" name="Tunnel">
-      <a name="facing" val="north"/>
-      <a name="label" val="RESET"/>
-    </comp>
-    <comp lib="0" loc="(1260,450)" name="Tunnel">
-      <a name="width" val="32"/>
-      <a name="label" val="INSTR"/>
-    </comp>
-    <comp lib="0" loc="(990,300)" name="Clock"/>
-    <comp lib="0" loc="(600,160)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="sp"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(1250,320)" name="Tunnel">
-      <a name="label" val="clk"/>
-    </comp>
-    <comp lib="0" loc="(600,380)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="a3"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="4" loc="(1170,450)" name="ROM">
-      <a name="addrWidth" val="24"/>
-      <a name="dataWidth" val="32"/>
-      <a name="contents">addr/data: 24 32
-fff00113 12345437 67840413 8402b3 840333 8403b3 2b3 333
-3b3 22b00493 84a023 4a283 528333 5283b3 2b3 333
-3b3 4a283 54a223 44a303 2b3 333 100293 200293
-8002b3 500333 5003b3 500e33 2b3 333 3b3 e33
-42003 33 29a00013 2b3 4a003 2023 42303 2b3
-333
-</a>
-    </comp>
-    <comp lib="0" loc="(960,240)" name="Constant"/>
-    <comp lib="0" loc="(1060,200)" name="Constant">
-      <a name="facing" val="west"/>
-    </comp>
-    <comp lib="1" loc="(1040,320)" name="OR Gate">
-      <a name="size" val="30"/>
-      <a name="inputs" val="2"/>
-    </comp>
-    <comp lib="0" loc="(510,800)" name="Tunnel">
-      <a name="facing" val="south"/>
-      <a name="label" val="END"/>
-    </comp>
-    <comp lib="0" loc="(600,500)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="s3"/>
-      <a name="labelloc" val="east"/>
-    </comp>
     <comp lib="0" loc="(510,840)" name="Tunnel">
       <a name="facing" val="south"/>
       <a name="label" val="ERR"/>
-    </comp>
-    <comp lib="0" loc="(70,840)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="width" val="32"/>
-      <a name="label" val="INSTR"/>
-    </comp>
-    <comp lib="0" loc="(600,400)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="a4"/>
-      <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(600,540)" name="Probe">
       <a name="facing" val="west"/>
@@ -563,30 +573,16 @@ fff00113 12345437 67840413 8402b3 840333 8403b3 2b3 333
       <a name="label" val="s5"/>
       <a name="labelloc" val="east"/>
     </comp>
-    <comp lib="0" loc="(600,440)" name="Probe">
+    <comp lib="0" loc="(600,220)" name="Probe">
       <a name="facing" val="west"/>
       <a name="radix" val="16"/>
-      <a name="label" val="a6"/>
+      <a name="label" val="t0"/>
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(600,260)" name="Probe">
       <a name="facing" val="west"/>
       <a name="radix" val="16"/>
       <a name="label" val="t2"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(600,340)" name="Probe">
-      <a name="facing" val="west"/>
-      <a name="radix" val="16"/>
-      <a name="label" val="a1"/>
-      <a name="labelloc" val="east"/>
-    </comp>
-    <comp lib="0" loc="(1170,300)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="END"/>
-    </comp>
-    <comp lib="5" loc="(600,810)" name="LED">
-      <a name="label" val="END"/>
       <a name="labelloc" val="east"/>
     </comp>
   </circuit>

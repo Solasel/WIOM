@@ -1,46 +1,67 @@
-addi sp x0 -1 #initialize values
-addi ra x0 1
+addi sp x0 -1
 
-add t0 x0 x0
-add t1 x0 x0
+# Set up values for branch comparison.
+addi s0 x0 -1
+addi s1 x0 1
 
-jal x0 start #jump over the bad catcher
+# Set up a bad loop that we'll get caught in we
+# 	take a bad jump.
+# Also set up an intermediary for the jump test.
+jal x0 jtest
 
-badjump: jal x0 badjump #infinite loops if we take a jump we shouldn't have
+bad: jal x0 bad
 
-add x0 x0 x0 #part 1
+jtest0: jal x0 jtest1 # Jump ahead to jtest1
+btest0: beq x0 x0 btest1 # Jump forward
+jal x0 bad
 
-start: addi a0 x0 5 
-jal s0 loop #go to loop, a function that decrements a0 until it reaches 0.
-jal x0 cont #go on with the program
+# jal and jalr testing.
+jtest:
 
-loop: beq a0 x0 return
-addi a0 a0 -1
-jal x0 loop
-return: jalr x0 s0 0
+jal x0 jtest0 # Jump back to jtest0
+jal x0 bad
 
-cont: blt sp x0 cont2 #should be taken because -1 < 0
-jal x0 badjump
+jtest1: jal ra jtest2 # Jump ahead to jtest2
+jal x0 jtest_hard # Jump to the harder tests.
+jal x0 bad
 
-cont2: blt x0 ra cont3 #should be taken because 0 < 1
-jal x0 badjump
+jtest2: jalr x0 0(ra) # Jump back to ra
+jal x0 bad
 
-cont3: bltu sp x0 badjump #should NOT be taken because -1 == some huge number unsigned, which is not less than 0
-beq x0 x0 cont4 #should be taken since 0 == 0
-jal x0 badjump
+# Complex jalr testing.
+jtest_hard:
 
-cont4: addi a0 x0 3
-jal s0 loop #call loop again, because why not
-addi t0 x0 5
+# Testing jalr with offset.
+jal ra jtest3
+jal x0 bad
+jal x0 jtest4
 
-add x0 x0 x0 #part 2
+jtest3: jalr x0 4(ra)
+jal x0 bad
 
-jal ra next #jump to next
-next: jalr ra ra 0 #first jump here again, then jump to the next instruction since we updated ra
+# Testing circular jalr usage.
+jtest4: jal ra jtest5
+jtest5: jalr ra 0(ra)
 
-jal ra next2 #jump to next2
-add x0 x0 x0
-next2: jalr ra ra 4 #first jump here again, then jump OVER the bad jump since we updated ra
-jal x0 badjump
+jal ra jtest6
+jal x0 bad
+jtest6: jalr ra 4(ra)
+jal x0 bad
 
-addi t1 x0 5
+# Branch tests!
+
+# If you take any of these you're in trouble.
+bne x0 x0 bad
+beq x0 s0 bad
+blt x0 s0 bad
+bge x0 s1 bad
+bltu x0 x0 bad
+bgeu x0 s1 bad
+
+# Load some nasty stuff in the branch delay slot.
+beq x0 x0 btest0
+jal ra bad
+jalr x0 -4(ra)
+
+btest1: add x0 x0 x0
+
